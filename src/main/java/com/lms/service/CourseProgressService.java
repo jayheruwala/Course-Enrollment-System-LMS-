@@ -16,17 +16,37 @@ public class CourseProgressService {
     private final EnrollmentRepository enrollmentRepository;
     private final LessonRepository lessonRepository;
     private final CertificateRepository certificateRepository;
+    private final AssignmentRepository assignmentRepository;
+    private final QuizRepository quizRepository;
+    private final SubmissionRepository submissionRepository;
+    private final QuizAttemptRepository quizAttemptRepository;
+    private final StudentRepository studentRepository;
 
     @Transactional
-    public Enrollment updateProgress(Long studentId, Long courseId, int completedLessonsCount) {
+    public Enrollment updateProgress(Long studentId, Long courseId) {
         Enrollment enrollment = enrollmentRepository.findByStudentIdAndCourseId(studentId, courseId)
                 .orElseThrow(() -> new ResourceNotFoundException("Enrollment not found"));
 
+        Student student = studentRepository.findById(studentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Student not found"));
+
         int totalLessons = lessonRepository.countByCourseId(courseId);
+        int totalAssignments = assignmentRepository.countByCourseId(courseId);
+        int totalQuizzes = quizRepository.findByCourseId(courseId).size();
+
+        long completedLessonsCount = student.getCompletedLessons().stream()
+                .filter(l -> l.getCourse().getId().equals(courseId))
+                .count();
+
+        int submittedAssignmentsCount = submissionRepository.countByStudentIdAndAssignmentCourseId(studentId, courseId);
+        int passedQuizzesCount = quizAttemptRepository.countDistinctQuizzesPassedByStudentInCourse(studentId, courseId);
+
+        int totalItems = totalLessons + totalAssignments + totalQuizzes;
         double progress = 0.0;
         
-        if (totalLessons > 0) {
-            progress = ((double) completedLessonsCount / totalLessons) * 100;
+        if (totalItems > 0) {
+            long completedItems = completedLessonsCount + submittedAssignmentsCount + passedQuizzesCount;
+            progress = ((double) completedItems / totalItems) * 100;
         }
 
         enrollment.setProgress(progress);
@@ -39,8 +59,6 @@ public class CourseProgressService {
     }
 
     private void checkAndCompleteCourse(Enrollment enrollment) {
-        // Logic to verify assignments and quizzes would go here in a real scenario
-        // For now, if progress is 100%, mark as complete
         enrollment.setStatus(EnrollmentStatus.COMPLETED);
         enrollment.setCompletionDate(LocalDate.now());
 

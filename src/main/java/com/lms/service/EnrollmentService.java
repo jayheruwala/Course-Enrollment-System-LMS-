@@ -25,6 +25,7 @@ public class EnrollmentService {
     private final EnrollmentRepository enrollmentRepository;
     private final StudentRepository studentRepository;
     private final CourseRepository courseRepository;
+    private final com.lms.repository.CertificateRepository certificateRepository;
 
     @Transactional
     public EnrollmentResponse enrollStudent(Long studentId, Long courseId) {
@@ -113,5 +114,39 @@ public class EnrollmentService {
         response.setProgress(enrollment.getProgress());
         response.setCompletionDate(enrollment.getCompletionDate());
         return response;
+    }
+
+    public java.util.Map<String, String> generateCertificate(Long studentId, Long enrollmentId) {
+        Enrollment enrollment = enrollmentRepository.findById(enrollmentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Enrollment not found"));
+        
+        if (!enrollment.getStudent().getId().equals(studentId)) {
+            throw new org.springframework.security.access.AccessDeniedException("Access Denied: You do not own this enrollment");
+        }
+        
+        if (enrollment.getStatus() != EnrollmentStatus.COMPLETED) {
+            throw new BadRequestException("Course is not completed yet");
+        }
+
+        com.lms.entity.Certificate certificate = certificateRepository.findByEnrollmentId(enrollmentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Certificate not found"));
+
+        return java.util.Map.of(
+            "studentName", enrollment.getStudent().getName(),
+            "courseTitle", enrollment.getCourse().getTitle(),
+            "issueDate", certificate.getIssueDate().toString(),
+            "certificateUrl", certificate.getUrl()
+        );
+    }
+
+    @org.springframework.scheduling.annotation.Scheduled(cron = "0 0 0 * * ?")
+    @Transactional
+    public void expireOldEnrollments() {
+        LocalDate cutoffDate = LocalDate.now().minusDays(180);
+        List<Enrollment> oldEnrollments = enrollmentRepository.findByStatusAndEnrollmentDateBefore(EnrollmentStatus.ACTIVE, cutoffDate);
+        for (Enrollment enrollment : oldEnrollments) {
+            enrollment.setStatus(EnrollmentStatus.EXPIRED);
+        }
+        enrollmentRepository.saveAll(oldEnrollments);
     }
 }

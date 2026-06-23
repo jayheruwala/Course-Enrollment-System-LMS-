@@ -10,4 +10,7 @@ import java.util.List;
 public interface SubmissionRepository extends JpaRepository<Submission, Long> {
     List<Submission> findByAssignmentId(Long assignmentId);
     List<Submission> findByStudentId(Long studentId);
+    
+    @org.springframework.data.jpa.repository.Query("SELECT COUNT(s) FROM Submission s WHERE s.student.id = :studentId AND s.assignment.course.id = :courseId")
+    int countByStudentIdAndAssignmentCourseId(Long studentId, Long courseId);
 }

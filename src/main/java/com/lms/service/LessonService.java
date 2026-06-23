@@ -18,11 +18,17 @@ public class LessonService {
     private final LessonRepository lessonRepository;
     private final CourseRepository courseRepository;
     private final CourseProgressService progressService;
+    private final com.lms.repository.StudentRepository studentRepository;
+    private final com.lms.repository.EnrollmentRepository enrollmentRepository;
 
     @Transactional
-    public LessonResponse addLesson(Long courseId, LessonRequest request) {
+    public LessonResponse addLesson(Long instructorId, Long courseId, LessonRequest request) {
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new ResourceNotFoundException("Course not found"));
+
+        if (!course.getInstructor().getId().equals(instructorId)) {
+            throw new org.springframework.security.access.AccessDeniedException("You do not have permission to add lessons to this course");
+        }
 
         int currentLessonCount = lessonRepository.countByCourseId(courseId);
 
@@ -37,8 +43,21 @@ public class LessonService {
     }
 
     @Transactional
-    public void markLessonComplete(Long studentId, Long courseId, int completedLessonsCount) {
-        progressService.updateProgress(studentId, courseId, completedLessonsCount);
+    public void markLessonComplete(Long studentId, Long lessonId) {
+        Lesson lesson = lessonRepository.findById(lessonId)
+                .orElseThrow(() -> new ResourceNotFoundException("Lesson not found"));
+        
+        com.lms.entity.Student student = studentRepository.findById(studentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Student not found"));
+                
+        if (!enrollmentRepository.existsByStudentIdAndCourseId(studentId, lesson.getCourse().getId())) {
+            throw new com.lms.exception.BadRequestException("Student is not enrolled in this course");
+        }
+        
+        student.getCompletedLessons().add(lesson);
+        studentRepository.save(student);
+        
+        progressService.updateProgress(studentId, lesson.getCourse().getId());
     }
 
     private LessonResponse mapToResponse(Lesson lesson) {

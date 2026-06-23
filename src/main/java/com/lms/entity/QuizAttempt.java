@@ -43,6 +43,6 @@ public class QuizAttempt extends Auditable {
     private LocalDateTime submittedAt;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(columnDefinition = "jsonb")
+    @Column(name = "student_answers")
     private java.util.List<com.lms.dto.AnswerDto> studentAnswers;
 }

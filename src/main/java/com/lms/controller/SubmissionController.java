@@ -31,9 +31,11 @@ public class SubmissionController {
 
     @PutMapping("/{submissionId}/grade")
     @PreAuthorize("hasRole('INSTRUCTOR')")
-    public ResponseEntity<ApiResponse<com.lms.dto.SubmissionResponse>> gradeAssignment(@PathVariable Long submissionId, 
-                                              @RequestBody Map<String, Double> payload) {
+    public ResponseEntity<ApiResponse<com.lms.dto.SubmissionResponse>> gradeAssignment(
+            @AuthenticationPrincipal UserDetailsImpl userDetails,
+            @PathVariable Long submissionId, 
+            @RequestBody Map<String, Double> payload) {
         Double score = payload.get("score");
-        return ResponseEntity.ok(ApiResponse.success("Assignment graded successfully", submissionService.gradeAssignment(submissionId, score)));
+        return ResponseEntity.ok(ApiResponse.success("Assignment graded successfully", submissionService.gradeAssignment(userDetails.getId(), submissionId, score)));
     }
 }

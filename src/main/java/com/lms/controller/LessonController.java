@@ -23,18 +23,18 @@ public class LessonController {
     @PostMapping("/courses/{courseId}/lessons")
     @PreAuthorize("hasRole('INSTRUCTOR')")
     public ResponseEntity<ApiResponse<com.lms.dto.LessonResponse>> addLesson(
+            @AuthenticationPrincipal UserDetailsImpl userDetails,
             @PathVariable Long courseId,
             @Valid @RequestBody LessonRequest request) {
-        return new ResponseEntity<>(ApiResponse.success("Lesson created successfully", lessonService.addLesson(courseId, request)), HttpStatus.CREATED);
+        return new ResponseEntity<>(ApiResponse.success("Lesson created successfully", lessonService.addLesson(userDetails.getId(), courseId, request)), HttpStatus.CREATED);
     }
 
-    @PutMapping("/enrollments/courses/{courseId}/lessons/complete")
+    @PutMapping("/lessons/{lessonId}/complete")
     @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<ApiResponse<Void>> markLessonComplete(
             @AuthenticationPrincipal UserDetailsImpl userDetails,
-            @PathVariable Long courseId,
-            @RequestParam int completedLessonsCount) {
-        lessonService.markLessonComplete(userDetails.getId(), courseId, completedLessonsCount);
+            @PathVariable Long lessonId) {
+        lessonService.markLessonComplete(userDetails.getId(), lessonId);
         return ResponseEntity.ok(ApiResponse.success("Lesson marked as complete", null));
     }
 }

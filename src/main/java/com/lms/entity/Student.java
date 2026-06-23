@@ -23,4 +23,12 @@ public class Student extends User {
 
     @Column(nullable = false)
     private String status; // e.g., ACTIVE, INACTIVE
+
+    @jakarta.persistence.ManyToMany
+    @jakarta.persistence.JoinTable(
+        name = "student_completed_lessons",
+        joinColumns = @jakarta.persistence.JoinColumn(name = "student_id"),
+        inverseJoinColumns = @jakarta.persistence.JoinColumn(name = "lesson_id")
+    )
+    private java.util.Set<Lesson> completedLessons = new java.util.HashSet<>();
 }

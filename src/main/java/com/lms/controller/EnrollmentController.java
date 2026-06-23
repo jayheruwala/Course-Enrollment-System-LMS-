@@ -42,8 +42,10 @@ public class EnrollmentController {
 
     @PostMapping("/{enrollmentId}/certificate")
     @PreAuthorize("hasRole('STUDENT')")
-    public ResponseEntity<ApiResponse<Map<String, String>>> generateCertificate(@PathVariable Long enrollmentId) {
-        return new ResponseEntity<>(ApiResponse.success("Certificate generated successfully", Map.of("message", "Certificate generated successfully")), HttpStatus.CREATED);
+    public ResponseEntity<ApiResponse<Map<String, String>>> generateCertificate(
+            @AuthenticationPrincipal UserDetailsImpl userDetails,
+            @PathVariable Long enrollmentId) {
+        return new ResponseEntity<>(ApiResponse.success("Certificate retrieved successfully", enrollmentService.generateCertificate(userDetails.getId(), enrollmentId)), HttpStatus.OK);
     }
 
     @GetMapping("/course/{courseId}/student/{studentId}/progress")

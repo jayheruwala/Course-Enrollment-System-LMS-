@@ -1,1 +1,994 @@
-{"success":false,"message":"Unauthorized: Full authentication is required to access this resource","data":null}
+openapi: 3.0.1
+info:
+  title: OpenAPI definition
+  version: v0
+servers:
+- url: http://localhost:8080
+  description: Generated server url
+paths:
+  /api/submissions/{submissionId}/grade:
+    put:
+      tags:
+      - submission-controller
+      operationId: gradeAssignment
+      parameters:
+      - name: submissionId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties:
+                type: number
+                format: double
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseSubmissionResponse"
+  /api/enrollments/{enrollmentId}/drop:
+    put:
+      tags:
+      - enrollment-controller
+      operationId: dropCourse
+      parameters:
+      - name: enrollmentId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseEnrollmentResponse"
+  /api/lessons/{lessonId}/complete:
+    put:
+      tags:
+      - lesson-controller
+      operationId: markLessonComplete
+      parameters:
+      - name: lessonId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseVoid"
+  /api/courses/{courseId}:
+    put:
+      tags:
+      - course-controller
+      operationId: updateCourse
+      parameters:
+      - name: courseId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CourseRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseCourseResponse"
+    delete:
+      tags:
+      - course-controller
+      operationId: deleteCourse
+      parameters:
+      - name: courseId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseVoid"
+  /api/submissions/assignment/{assignmentId}:
+    post:
+      tags:
+      - submission-controller
+      operationId: submitAssignment
+      parameters:
+      - name: assignmentId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties:
+                type: string
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseSubmissionResponse"
+  /api/quizzes/{quizId}/attempt:
+    post:
+      tags:
+      - quiz-controller
+      operationId: submitQuizAttempt
+      parameters:
+      - name: quizId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/QuizAttemptRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseQuizAttemptResponse"
+  /api/enrollments/{enrollmentId}/certificate:
+    post:
+      tags:
+      - enrollment-controller
+      operationId: generateCertificate
+      parameters:
+      - name: enrollmentId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseMapStringString"
+  /api/enrollments/course/{courseId}:
+    post:
+      tags:
+      - enrollment-controller
+      operationId: enrollStudent
+      parameters:
+      - name: courseId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseEnrollmentResponse"
+  /api/courses:
+    post:
+      tags:
+      - course-controller
+      operationId: createCourse
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CourseRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseCourseResponse"
+  /api/courses/{courseId}/quizzes:
+    post:
+      tags:
+      - quiz-controller
+      operationId: createQuiz
+      parameters:
+      - name: courseId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/QuizRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseQuizResponse"
+  /api/courses/{courseId}/lessons:
+    post:
+      tags:
+      - lesson-controller
+      operationId: addLesson
+      parameters:
+      - name: courseId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LessonRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseLessonResponse"
+  /api/courses/{courseId}/assignments:
+    post:
+      tags:
+      - assignment-controller
+      operationId: addAssignment
+      parameters:
+      - name: courseId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AssignmentRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseAssignmentResponse"
+  /api/auth/register:
+    post:
+      tags:
+      - auth-controller
+      operationId: registerUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseVoid"
+  /api/auth/refreshtoken:
+    post:
+      tags:
+      - auth-controller
+      operationId: refreshtoken
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TokenRefreshRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseTokenRefreshResponse"
+  /api/auth/login:
+    post:
+      tags:
+      - auth-controller
+      operationId: authenticateUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseJwtResponse"
+  /api/enrollments/my-enrollments:
+    get:
+      tags:
+      - enrollment-controller
+      operationId: getStudentEnrollments
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseListEnrollmentResponse"
+  /api/enrollments/course/{courseId}/student/{studentId}/progress:
+    get:
+      tags:
+      - enrollment-controller
+      operationId: getCourseProgress
+      parameters:
+      - name: courseId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: studentId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseMapStringDouble"
+  /api/courses/{courseId}/students:
+    get:
+      tags:
+      - course-controller
+      operationId: getCourseStudents
+      parameters:
+      - name: courseId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseListUserResponse"
+  /api/courses/{courseId}/completion-rate:
+    get:
+      tags:
+      - course-controller
+      operationId: getCourseCompletionRate
+      parameters:
+      - name: courseId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseMapStringDouble"
+  /api/courses/search:
+    get:
+      tags:
+      - course-controller
+      operationId: searchCourses
+      parameters:
+      - name: category
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - PROGRAMMING
+          - DESIGN
+          - BUSINESS
+          - MARKETING
+          - DATA_SCIENCE
+          - OTHER
+      - name: title
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseListCourseResponse"
+  /api/courses/instructor:
+    get:
+      tags:
+      - course-controller
+      operationId: getInstructorCourses
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseListCourseResponse"
+  /api/assignments/{assignmentId}/submissions:
+    get:
+      tags:
+      - assignment-controller
+      operationId: getAssignmentSubmissions
+      parameters:
+      - name: assignmentId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseListSubmissionResponse"
+components:
+  schemas:
+    ApiResponseSubmissionResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          $ref: "#/components/schemas/SubmissionResponse"
+    SubmissionResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        assignmentId:
+          type: integer
+          format: int64
+        studentId:
+          type: integer
+          format: int64
+        content:
+          type: string
+        submittedAt:
+          type: string
+          format: date-time
+        score:
+          type: number
+          format: double
+        feedback:
+          type: string
+    ApiResponseEnrollmentResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          $ref: "#/components/schemas/EnrollmentResponse"
+    EnrollmentResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        studentId:
+          type: integer
+          format: int64
+        courseId:
+          type: integer
+          format: int64
+        enrollmentDate:
+          type: string
+          format: date
+        status:
+          type: string
+          enum:
+          - ACTIVE
+          - COMPLETED
+          - DROPPED
+          - EXPIRED
+        progress:
+          type: number
+          format: double
+        completionDate:
+          type: string
+          format: date
+    ApiResponseVoid:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          type: object
+    CourseRequest:
+      required:
+      - category
+      - duration
+      - maxStudents
+      - price
+      - title
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        duration:
+          type: integer
+          format: int32
+        price:
+          type: number
+        maxStudents:
+          type: integer
+          format: int32
+        category:
+          type: string
+          enum:
+          - PROGRAMMING
+          - DESIGN
+          - BUSINESS
+          - MARKETING
+          - DATA_SCIENCE
+          - OTHER
+    ApiResponseCourseResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          $ref: "#/components/schemas/CourseResponse"
+    CourseResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        title:
+          type: string
+        description:
+          type: string
+        instructorId:
+          type: integer
+          format: int64
+        duration:
+          type: integer
+          format: int32
+        price:
+          type: number
+        maxStudents:
+          type: integer
+          format: int32
+        category:
+          type: string
+          enum:
+          - PROGRAMMING
+          - DESIGN
+          - BUSINESS
+          - MARKETING
+          - DATA_SCIENCE
+          - OTHER
+    AnswerDto:
+      type: object
+      properties:
+        questionText:
+          type: string
+        selectedAnswer:
+          type: string
+    QuizAttemptRequest:
+      required:
+      - answers
+      - durationTakenMinutes
+      type: object
+      properties:
+        answers:
+          type: array
+          items:
+            $ref: "#/components/schemas/AnswerDto"
+        durationTakenMinutes:
+          type: integer
+          format: int32
+    ApiResponseQuizAttemptResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          $ref: "#/components/schemas/QuizAttemptResponse"
+    QuizAttemptResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        quizId:
+          type: integer
+          format: int64
+        studentId:
+          type: integer
+          format: int64
+        score:
+          type: number
+          format: double
+        status:
+          type: string
+        attemptNumber:
+          type: integer
+          format: int32
+        submittedAt:
+          type: string
+          format: date-time
+        studentAnswers:
+          type: array
+          items:
+            $ref: "#/components/schemas/AnswerDto"
+    ApiResponseMapStringString:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          type: object
+          additionalProperties:
+            type: string
+    QuestionDto:
+      type: object
+      properties:
+        questionText:
+          type: string
+        options:
+          type: array
+          items:
+            type: string
+        correctAnswer:
+          type: string
+    QuizRequest:
+      required:
+      - passingScore
+      - questions
+      - timeLimit
+      - title
+      type: object
+      properties:
+        title:
+          type: string
+        questions:
+          type: array
+          items:
+            $ref: "#/components/schemas/QuestionDto"
+        passingScore:
+          type: number
+          format: double
+        timeLimit:
+          type: integer
+          format: int32
+    ApiResponseQuizResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          $ref: "#/components/schemas/QuizResponse"
+    QuizResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        courseId:
+          type: integer
+          format: int64
+        title:
+          type: string
+        questions:
+          type: array
+          items:
+            $ref: "#/components/schemas/QuestionDto"
+        passingScore:
+          type: number
+          format: double
+        timeLimit:
+          type: integer
+          format: int32
+    LessonRequest:
+      required:
+      - content
+      - duration
+      - title
+      type: object
+      properties:
+        title:
+          type: string
+        content:
+          type: string
+        duration:
+          type: integer
+          format: int32
+    ApiResponseLessonResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          $ref: "#/components/schemas/LessonResponse"
+    LessonResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        courseId:
+          type: integer
+          format: int64
+        title:
+          type: string
+        content:
+          type: string
+        orderIndex:
+          type: integer
+          format: int32
+        duration:
+          type: integer
+          format: int32
+    AssignmentRequest:
+      required:
+      - description
+      - dueDate
+      - maxScore
+      - title
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        dueDate:
+          type: string
+          format: date-time
+        maxScore:
+          type: number
+          format: double
+    ApiResponseAssignmentResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          $ref: "#/components/schemas/AssignmentResponse"
+    AssignmentResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        courseId:
+          type: integer
+          format: int64
+        title:
+          type: string
+        description:
+          type: string
+        dueDate:
+          type: string
+          format: date-time
+        maxScore:
+          type: number
+          format: double
+    RegisterRequest:
+      required:
+      - email
+      - name
+      - password
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+        role:
+          type: string
+    TokenRefreshRequest:
+      required:
+      - refreshToken
+      type: object
+      properties:
+        refreshToken:
+          type: string
+    ApiResponseTokenRefreshResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          $ref: "#/components/schemas/TokenRefreshResponse"
+    TokenRefreshResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+        tokenType:
+          type: string
+    LoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+    ApiResponseJwtResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          $ref: "#/components/schemas/JwtResponse"
+    JwtResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+        type:
+          type: string
+        refreshToken:
+          type: string
+        id:
+          type: integer
+          format: int64
+        email:
+          type: string
+        role:
+          type: string
+    ApiResponseListEnrollmentResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/EnrollmentResponse"
+    ApiResponseMapStringDouble:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          type: object
+          additionalProperties:
+            type: number
+            format: double
+    ApiResponseListUserResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/UserResponse"
+    UserResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+    ApiResponseListCourseResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/CourseResponse"
+    ApiResponseListSubmissionResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/SubmissionResponse"

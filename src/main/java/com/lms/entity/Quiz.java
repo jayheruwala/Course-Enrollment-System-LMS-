@@ -28,7 +28,7 @@ public class Quiz extends Auditable {
     private String title;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(columnDefinition = "jsonb")
+    @Column(name = "questions")
     private java.util.List<com.lms.dto.QuestionDto> questions;
 
     @Column(nullable = false)

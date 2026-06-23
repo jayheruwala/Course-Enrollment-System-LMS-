@@ -31,6 +31,7 @@ public class QuizService {
     private final CourseRepository courseRepository;
     private final StudentRepository studentRepository;
     private final com.lms.repository.EnrollmentRepository enrollmentRepository;
+    private final CourseProgressService progressService;
 
     @Transactional
     public QuizResponse createQuiz(Long courseId, QuizRequest request) {
@@ -80,7 +81,9 @@ public class QuizService {
         attempt.setAttemptNumber(previousAttempts.size() + 1);
         attempt.setSubmittedAt(LocalDateTime.now());
 
-        return mapToQuizAttemptResponse(quizAttemptRepository.save(attempt));
+        QuizAttempt saved = quizAttemptRepository.save(attempt);
+        progressService.updateProgress(studentId, quiz.getCourse().getId());
+        return mapToQuizAttemptResponse(saved);
     }
 
     private double evaluateAnswers(java.util.List<com.lms.dto.QuestionDto> questions, java.util.List<com.lms.dto.AnswerDto> answers) {

@@ -4,9 +4,9 @@ server:
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/lms
+    driver-class-name: org.postgresql.Driver
     username: lms_user
     password: lms_password
-    driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
       ddl-auto: update

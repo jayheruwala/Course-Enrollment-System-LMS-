@@ -24,6 +24,7 @@ public class SubmissionService {
     private final AssignmentRepository assignmentRepository;
     private final StudentRepository studentRepository;
     private final com.lms.repository.EnrollmentRepository enrollmentRepository;
+    private final CourseProgressService progressService;
 
     @Transactional
     public SubmissionResponse submitAssignment(Long studentId, Long assignmentId, String content) {
@@ -55,13 +56,23 @@ public class SubmissionService {
         submission.setContent(content);
         submission.setSubmittedAt(now);
 
-        return mapToResponse(submissionRepository.save(submission));
+        Submission saved = submissionRepository.save(submission);
+        progressService.updateProgress(studentId, assignment.getCourse().getId());
+        return mapToResponse(saved);
     }
 
     @Transactional
-    public SubmissionResponse gradeAssignment(Long submissionId, Double score) {
+    public SubmissionResponse gradeAssignment(Long instructorId, Long submissionId, Double score) {
         Submission submission = submissionRepository.findById(submissionId)
                 .orElseThrow(() -> new ResourceNotFoundException("Submission not found"));
+
+        if (!submission.getAssignment().getCourse().getInstructor().getId().equals(instructorId)) {
+            throw new org.springframework.security.access.AccessDeniedException("You do not have permission to grade this submission");
+        }
+
+        if (score > submission.getAssignment().getMaxScore()) {
+            throw new BadRequestException("Score cannot exceed the assignment's maximum score");
+        }
 
         LocalDateTime dueDate = submission.getAssignment().getDueDate();
         LocalDateTime submittedAt = submission.getSubmittedAt();

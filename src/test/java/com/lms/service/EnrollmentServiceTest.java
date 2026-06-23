@@ -35,6 +35,9 @@ public class EnrollmentServiceTest {
     @Mock
     private CourseRepository courseRepository;
 
+    @Mock
+    private com.lms.repository.CertificateRepository certificateRepository;
+
     @InjectMocks
     private EnrollmentService enrollmentService;
 
@@ -109,5 +112,99 @@ public class EnrollmentServiceTest {
 
         assertThrows(BadRequestException.class, () -> enrollmentService.enrollStudent(1L, 1L));
         verify(enrollmentRepository, never()).save(any(Enrollment.class));
+    }
+
+    @Test
+    void getCourseProgress_Success() {
+        com.lms.entity.Instructor instructor = new com.lms.entity.Instructor();
+        instructor.setId(5L);
+        course.setInstructor(instructor);
+
+        Enrollment enrollment = new Enrollment();
+        enrollment.setCourse(course);
+        enrollment.setProgress(75.0);
+
+        when(enrollmentRepository.findByStudentIdAndCourseId(1L, 1L)).thenReturn(Optional.of(enrollment));
+
+        // Test as Student (self)
+        Double progress = enrollmentService.getCourseProgress(1L, false, true, 1L, 1L);
+        assertEquals(75.0, progress);
+
+        // Test as Admin
+        progress = enrollmentService.getCourseProgress(99L, true, false, 1L, 1L);
+        assertEquals(75.0, progress);
+
+        // Test as Instructor (owner)
+        progress = enrollmentService.getCourseProgress(5L, false, false, 1L, 1L);
+        assertEquals(75.0, progress);
+    }
+
+    @Test
+    void getCourseProgress_AccessDenied() {
+        com.lms.entity.Instructor instructor = new com.lms.entity.Instructor();
+        instructor.setId(5L);
+        course.setInstructor(instructor);
+
+        Enrollment enrollment = new Enrollment();
+        enrollment.setCourse(course);
+
+        when(enrollmentRepository.findByStudentIdAndCourseId(1L, 1L)).thenReturn(Optional.of(enrollment));
+
+        // Test Student trying to view another student's progress
+        assertThrows(org.springframework.security.access.AccessDeniedException.class, () -> 
+            enrollmentService.getCourseProgress(2L, false, true, 1L, 1L));
+
+        // Test Instructor trying to view a course they don't own
+        assertThrows(org.springframework.security.access.AccessDeniedException.class, () -> 
+            enrollmentService.getCourseProgress(9L, false, false, 1L, 1L));
+    }
+
+    @Test
+    void generateCertificate_Success() {
+        Enrollment enrollment = new Enrollment();
+        enrollment.setId(100L);
+        enrollment.setStudent(student);
+        course.setTitle("Java Basics");
+        enrollment.setCourse(course);
+        enrollment.setStatus(EnrollmentStatus.COMPLETED);
+
+        student.setName("Alice");
+
+        com.lms.entity.Certificate certificate = new com.lms.entity.Certificate();
+        certificate.setIssueDate(java.time.LocalDate.now());
+        certificate.setUrl("https://lms.com/certificates/100");
+
+        when(enrollmentRepository.findById(100L)).thenReturn(Optional.of(enrollment));
+        when(certificateRepository.findByEnrollmentId(100L)).thenReturn(Optional.of(certificate));
+
+        java.util.Map<String, String> res = enrollmentService.generateCertificate(1L, 100L);
+
+        assertNotNull(res);
+        assertEquals("Alice", res.get("studentName"));
+        assertEquals("Java Basics", res.get("courseTitle"));
+        assertEquals("https://lms.com/certificates/100", res.get("certificateUrl"));
+    }
+
+    @Test
+    void generateCertificate_NotCompleted_ThrowsException() {
+        Enrollment enrollment = new Enrollment();
+        enrollment.setId(100L);
+        enrollment.setStudent(student);
+        enrollment.setStatus(EnrollmentStatus.ACTIVE);
+
+        when(enrollmentRepository.findById(100L)).thenReturn(Optional.of(enrollment));
+
+        assertThrows(BadRequestException.class, () -> enrollmentService.generateCertificate(1L, 100L));
+    }
+
+    @Test
+    void generateCertificate_WrongStudent_ThrowsException() {
+        Enrollment enrollment = new Enrollment();
+        enrollment.setId(100L);
+        enrollment.setStudent(student);
+
+        when(enrollmentRepository.findById(100L)).thenReturn(Optional.of(enrollment));
+
+        assertThrows(org.springframework.security.access.AccessDeniedException.class, () -> enrollmentService.generateCertificate(2L, 100L));
     }
 }
