@@ -7,8 +7,9 @@ A robust, enterprise-grade Learning Management System backend built with **Sprin
 - **Role-Based Access Control (RBAC):** Distinct roles for `STUDENT`, `INSTRUCTOR`, and `ADMIN`.
 - **Course Management:** Instructors can create, update, and categorize courses.
 - **Enrollment System:** Strict validations for course capacity and student enrollment limits (max 5 active courses).
-- **Interactive Learning:** Support for structured Lessons, Quizzes with automated grading, and Assignments with manual grading workflows.
+- **Interactive Learning:** Support for structured Lessons, Quizzes with automated grading, and Assignments with manual grading workflows (including automatic late submission penalties).
 - **Analytics:** Instructors can view course completion rates and student progress.
+- **Certificates & Completion:** Strict automated course completion tracking that seamlessly issues Certificates to students upon successfully passing all course requirements.
 - **Security First:** Stateless JWT authentication, secure password hashing (BCrypt), and rigorous ownership validations (e.g., instructors can only grade submissions for courses they own).
 - **Interactive Documentation:** Automatically generated OpenAPI 3.0 specification via Swagger.
 
@@ -25,7 +26,8 @@ A robust, enterprise-grade Learning Management System backend built with **Sprin
 
 Before running the application, ensure you have the following installed:
 - **Java Development Kit (JDK) 21**
-- **PostgreSQL** (running locally or via Docker)
+- **Docker** (optional, but highly recommended for running the database)
+- **PostgreSQL** (if not using Docker)
 
 > **Important IDE Note:** If you are running this in an IDE like IntelliJ IDEA, ensure your *Project SDK* and *Java Compiler bytecode version* are strictly set to **Java 21**. Newer/Early Access compilers (like Java 26) will break the Lombok annotation processor!
 
@@ -36,15 +38,14 @@ Before running the application, ensure you have the following installed:
    cd LMS
    ```
 
-2. **Configure the Database**
-   Ensure PostgreSQL is running and create a database (the application defaults to `lms` or whatever is configured in your `application.properties`).
-
-   Update the database credentials in `src/main/resources/application.properties` if necessary:
-   ```properties
-   spring.datasource.url=jdbc:postgresql://localhost:5432/lms
-   spring.datasource.username=your_db_username
-   spring.datasource.password=your_db_password
+2. **Start the Database (Docker)**
+   The easiest way to get the PostgreSQL database running is by using the included `docker-compose.yml` file:
+   ```bash
+   docker-compose up -d db
    ```
+   *(This will start PostgreSQL on port 5432 with the database `lms` and credentials `lms_user`/`lms_password` already configured to match the application.)*
+   
+   If you prefer to run a local PostgreSQL instance without Docker, ensure you create a database named `lms` and configure the owner/credentials to match `src/main/resources/application.yml`.
 
 3. **Build and Run**
    You can run the application directly using the Maven wrapper:
