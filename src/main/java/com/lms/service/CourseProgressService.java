@@ -41,17 +41,19 @@ public class CourseProgressService {
         int submittedAssignmentsCount = submissionRepository.countByStudentIdAndAssignmentCourseId(studentId, courseId);
         int passedQuizzesCount = quizAttemptRepository.countDistinctQuizzesPassedByStudentInCourse(studentId, courseId);
 
-        int totalItems = totalLessons + totalAssignments + totalQuizzes;
+        // Rule 5: Course progress = completed lessons / total lessons
         double progress = 0.0;
-        
-        if (totalItems > 0) {
-            long completedItems = completedLessonsCount + submittedAssignmentsCount + passedQuizzesCount;
-            progress = ((double) completedItems / totalItems) * 100;
+        if (totalLessons > 0) {
+            progress = ((double) completedLessonsCount / totalLessons) * 100;
         }
-
         enrollment.setProgress(progress);
         
-        if (progress >= 100.0) {
+        // Rule 8: Course completion requires: all lessons + all assignments + final quiz >= passingScore
+        boolean allLessonsCompleted = (totalLessons == 0) || (completedLessonsCount >= totalLessons);
+        boolean allAssignmentsSubmitted = (totalAssignments == 0) || (submittedAssignmentsCount >= totalAssignments);
+        boolean allQuizzesPassed = (totalQuizzes == 0) || (passedQuizzesCount >= totalQuizzes);
+
+        if (allLessonsCompleted && allAssignmentsSubmitted && allQuizzesPassed) {
             checkAndCompleteCourse(enrollment);
         }
 
